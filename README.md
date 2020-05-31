@@ -161,7 +161,7 @@ Service Class|Service Level Agreement level of this application, workload, or se
 Start Date of the project|Date when this application, workload, or service was first deployed.|StartDate|{date}|No
 End Date of the Project|Date when this application, workload, or service is planned to be retired.|EndDate|{date}|No
 
-> This module allows you to manage the above metadata tags directly or as a variable using `variables.tf`. All Azure resources which support tagging can be tagged by specifying key-values in argument `tags`. Tag `ApplicationName` is added automatically on all resources. 
+> This module allows you to manage the above metadata tags directly or as a variable using `variables.tf`. All Azure resources which support tagging can be tagged by specifying key-values in argument `tags`. Tag `ResourceName` is added automatically on all resources. 
 
 ```
 module "vnet" {
