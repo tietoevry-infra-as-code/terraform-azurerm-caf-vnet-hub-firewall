@@ -146,8 +146,8 @@ When applying metadata tags to the cloud resources, you can include information 
 
 The following list provides the recommended common tags that capture important context and information about resources. Use this list as a starting point to establish your tagging conventions.
 
-Tag Name|Description|Key|Example|Value|Required?
---------|-----------|---|-------|-----|---------|
+Tag Name|Description|Key|ExampleValue|Required?
+--------|-----------|---|------------|---------|
 Project Name|Name of the Project for the infra is created. This is mandatory to create a resource names.|ProjectName|{Project name}|Yes
 Application Name|Name of the application, service, or workload the resource is associated with.|ApplicationName|{app name}|Yes
 Approver|Name	Person responsible for approving costs related to this resource.|Approver|{email}|Yes
