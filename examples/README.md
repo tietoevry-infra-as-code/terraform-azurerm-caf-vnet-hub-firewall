@@ -5,13 +5,13 @@ This module create a firewall with application/NAT/Network rules also supports t
 ## Module Usage
 
 ```
-module "vnet" {
+module "vnet-hub" {
   source = "github.com/tietoevry-infra-as-code/terraform-azurerm-caf-vnet-hub?ref=v1.0.0"
 
 # ....omitted
 }
 
-module "firewall" {
+module "hub-firewall" {
   source = "github.com/tietoevry-infra-as-code/terraform-azurerm-caf-vnet-hub-firewall?ref=v1.0.0"
 
   # (Required) Defining the VNet/subnet, Vent Address Prefix, LA workspace, storage and other arguments

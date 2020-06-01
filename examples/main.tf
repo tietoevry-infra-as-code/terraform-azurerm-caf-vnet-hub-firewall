@@ -10,7 +10,7 @@ locals {
   }
 }
 
-module "vnet" {
+module "vnet-hub" {
   source = "github.com/tietoevry-infra-as-code/terraform-azurerm-caf-vnet-hub?ref=v1.0.0"
 
   # By default, this module will create a resource group, proivde the name here 
@@ -95,7 +95,7 @@ module "vnet" {
   tags = local.tags
 }
 
-module "firewall" {
+module "hub-firewall" {
   source = "github.com/tietoevry-infra-as-code/terraform-azurerm-caf-vnet-hub-firewall?ref=v1.0.0-firewall"
 
   # (Required) Defining the VNet/subnet, Vent Address Prefix, LA workspace, storage and other arguments
