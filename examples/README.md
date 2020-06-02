@@ -16,11 +16,11 @@ module "hub-firewall" {
 
   # (Required) Defining the VNet/subnet, Vent Address Prefix, LA workspace, storage and other arguments
   # These values are expected from the VNet hub Module.  
-  resource_group_name           = module.vnet.resource_group_name
-  virtual_network_name          = module.vnet.virtual_network_name
-  location                      = module.vnet.resource_group_location
-  virtual_network_address_space = module.vnet.virtual_network_address_space
-  route_table_name              = module.vnet.route_table_name
+  resource_group_name           = module.vnet-hub.resource_group_name
+  virtual_network_name          = module.vnet-hub.virtual_network_name
+  location                      = module.vnet-hub.resource_group_location
+  virtual_network_address_space = module.vnet-hub.virtual_network_address_space
+  route_table_name              = module.vnet-hub.route_table_name
 
   # (Required) Project_Name, Subscription_type and environment are must to create resource names.
   project_name      = "tieto-internal"
@@ -29,9 +29,9 @@ module "hub-firewall" {
 
   # (Required) To enable Azure Monitoring and flow logs
   # Log retention to be inherited from the VNet hub Module. 
-  storage_account_id                   = module.vnet.storage_account_id
-  log_analytics_workspace_id           = module.vnet.log_analytics_workspace_id
-  azure_monitor_logs_retention_in_days = module.vnet.azure_monitor_logs_retention_in_days
+  storage_account_id                   = module.vnet-hub.storage_account_id
+  log_analytics_workspace_id           = module.vnet-hub.log_analytics_workspace_id
+  azure_monitor_logs_retention_in_days = module.vnet-hub.azure_monitor_logs_retention_in_days
 
   # (Optional) To enable the availability zones for firewall. 
   # Availability Zones can only be configured during deployment 
