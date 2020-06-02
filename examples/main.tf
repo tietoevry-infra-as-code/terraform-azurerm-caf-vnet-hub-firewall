@@ -96,7 +96,7 @@ module "vnet-hub" {
 }
 
 module "hub-firewall" {
-  source = "github.com/tietoevry-infra-as-code/terraform-azurerm-caf-vnet-hub-firewall?ref=v1.0.0-firewall"
+  source = "github.com/tietoevry-infra-as-code/terraform-azurerm-caf-vnet-hub-firewall?ref=v1.0.0"
 
   # (Required) Defining the VNet/subnet, Vent Address Prefix, LA workspace, storage and other arguments
   # These values are expected from the VNet hub Module.  
