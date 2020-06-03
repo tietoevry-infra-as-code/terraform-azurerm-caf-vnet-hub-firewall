@@ -1,26 +1,21 @@
-# Azure Firewall Terraform Module   
+# Azure Firewall Terraform Module
 
-This module create a firewall with application/NAT/Network rules also supports the Hub Virtual Network module to enable the firewall option. 
+This module create a firewall with application/NAT/Network rules also supports the Hub Virtual Network module to enable the firewall option.
 
 ## Module Usage
 
-```
-module "vnet-hub" {
-  source = "github.com/tietoevry-infra-as-code/terraform-azurerm-caf-vnet-hub?ref=v1.0.0"
-
-# ....omitted
-}
-
+```bash
 module "hub-firewall" {
   source = "github.com/tietoevry-infra-as-code/terraform-azurerm-caf-vnet-hub-firewall?ref=v1.0.0"
 
-  # (Required) Defining the VNet/subnet, Vent Address Prefix, LA workspace, storage and other arguments
-  # These values are expected from the VNet hub Module.  
-  resource_group_name           = module.vnet-hub.resource_group_name
-  virtual_network_name          = module.vnet-hub.virtual_network_name
-  location                      = module.vnet-hub.resource_group_location
-  virtual_network_address_space = module.vnet-hub.virtual_network_address_space
-  route_table_name              = module.vnet-hub.route_table_name
+  # This module will not create a resource group, proivde the name of an existing resource group
+  # location must be the resource group location
+  # virtual network address space and name, route table name to be provided from vnet-hub module.  
+  resource_group_name           = var.resource_group_name
+  location                      = var.location
+  virtual_network_name          = var.virtual_network_name
+  virtual_network_address_space = var.virtual_network_address_space
+  route_table_name              = var.route_table_name
 
   # (Required) Project_Name, Subscription_type and environment are must to create resource names.
   project_name      = "tieto-internal"
@@ -28,13 +23,14 @@ module "hub-firewall" {
   environment       = "dev"
 
   # (Required) To enable Azure Monitoring and flow logs
-  # Log retention to be inherited from the VNet hub Module. 
-  storage_account_id                   = module.vnet-hub.storage_account_id
-  log_analytics_workspace_id           = module.vnet-hub.log_analytics_workspace_id
-  azure_monitor_logs_retention_in_days = module.vnet-hub.azure_monitor_logs_retention_in_days
+  # Log Retention in days - Possible values range between 30 and 730
+  # Log retention value to be inherited from the VNet-hub Module.
+  storage_account_id                   = var.storage_account_id
+  log_analytics_workspace_id           = var.log_analytics_workspace_id
+  azure_monitor_logs_retention_in_days = var.azure_monitor_logs_retention_in_days
 
-  # (Optional) To enable the availability zones for firewall. 
-  # Availability Zones can only be configured during deployment 
+  # (Optional) To enable the availability zones for firewall.
+  # Availability Zones can only be configured during deployment
   # You can't configure an existing firewall to include Availability Zones
   firewall_zones = [1, 2, 3]
 
@@ -65,6 +61,7 @@ module "hub-firewall" {
   ]
 
   # Adding TAG's to your Azure resources (Required)
+  # ProjectName and Env are already declared above, to use them here, create a varible.
   tags = {
     ProjectName  = "tieto-internal"
     Env          = "dev"
@@ -79,10 +76,10 @@ module "hub-firewall" {
 
 To run this example you need to execute following Terraform commands
 
-```
-$ terraform init
-$ terraform plan
-$ terraform apply
+```bash
+terraform init
+terraform plan
+terraform apply
 ```
 
 Run `terraform destroy` when you don't need these resources.
