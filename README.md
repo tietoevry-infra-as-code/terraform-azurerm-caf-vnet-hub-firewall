@@ -23,7 +23,7 @@ This module depend on following resources availability. To create these pre-requ
 
 ## Module Usage
 
-``` cs
+``` hcl
 module "hub-firewall" {
   source = "github.com/tietoevry-infra-as-code/terraform-azurerm-caf-vnet-hub-firewall?ref=v1.0.0"
 
