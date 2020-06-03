@@ -10,7 +10,7 @@ You can centrally create, enforce, and log application and network connectivity 
 
 ## PreRequisites
 
-This module depend on following resources availability. To create these pre-requisites, use [`terraform-azurerm-caf-vnet-hub`](https://github.com/tietoevry-infra-as-code/terraform-azurerm-caf-vnet-hub).
+This module depend on following resources availability. To create these pre-requisites, use the module [`terraform-azurerm-caf-vnet-hub`](https://github.com/tietoevry-infra-as-code/terraform-azurerm-caf-vnet-hub) from GitHub.
 
 * Resource Group
 * Location
