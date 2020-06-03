@@ -4,7 +4,7 @@ This module create a firewall with application/NAT/Network rules also supports t
 
 ## Module Usage
 
-```bash
+``` hcl
 module "hub-firewall" {
   source = "github.com/tietoevry-infra-as-code/terraform-azurerm-caf-vnet-hub-firewall?ref=v1.0.0"
 
@@ -76,7 +76,7 @@ module "hub-firewall" {
 
 To run this example you need to execute following Terraform commands
 
-```bash
+``` hcl
 terraform init
 terraform plan
 terraform apply

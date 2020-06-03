@@ -8,9 +8,22 @@ Source: [Azure Firewall Documentation](https://docs.microsoft.com/en-us/azure/fi
 
 You can centrally create, enforce, and log application and network connectivity policies across subscriptions and virtual networks. Azure Firewall uses a static public IP address for your virtual network resources allowing outside firewalls to identify traffic originating from your virtual network. The service is fully integrated with Azure Monitor for logging and analytics.
 
+## PreRequisites
+
+This module depend on following resources availability. To create these pre-requisites, use [`terraform-azurerm-caf-vnet-hub`](https://github.com/tietoevry-infra-as-code/terraform-azurerm-caf-vnet-hub).
+
+* Resource Group
+* Location
+* VNet Name
+* VNet Address Space
+* Route Table Name
+* Storage Account Id
+* Log Analytics Workspace Id
+* Log Retention days for Azure Monitoring Data
+
 ## Module Usage
 
-```bash
+``` cs
 module "hub-firewall" {
   source = "github.com/tietoevry-infra-as-code/terraform-azurerm-caf-vnet-hub-firewall?ref=v1.0.0"
 
@@ -92,7 +105,7 @@ This module centrally create allow or deny network filtering rules by source and
 
 To define the firewall rules, use the input variables `firewall_application_rules`, `firewall_network_rules` and `firewall_nat_rules`.
 
-```hcl
+``` hcl
 module "hub-firewall" {
   source = "github.com/tietoevry-infra-as-code/terraform-azurerm-caf-vnet-hub-firewall?ref=v1.0.0"
 
@@ -163,7 +176,7 @@ End Date of the Project|Date when this application, workload, or service is plan
 
 > This module allows you to manage the above metadata tags directly or as a variable using `variables.tf`. All Azure resources which support tagging can be tagged by specifying key-values in argument `tags`. Tag `ResourceName` is added automatically on all resources.
 
-```hcl
+``` hcl
 module "hub-firewall" {
   source = "github.com/tietoevry-infra-as-code/terraform-azurerm-caf-vnet-hub-firewall?ref=v1.0.0"
   create_resource_group   = false
