@@ -8,7 +8,7 @@ Source: [Azure Firewall Documentation](https://docs.microsoft.com/en-us/azure/fi
 
 You can centrally create, enforce, and log application and network connectivity policies across subscriptions and virtual networks. Azure Firewall uses a static public IP address for your virtual network resources allowing outside firewalls to identify traffic originating from your virtual network. The service is fully integrated with Azure Monitor for logging and analytics.
 
-## PreRequisites
+## Pre-Requisites
 
 This module depend on following resources availability. To create these pre-requisites, use the module [`terraform-azurerm-caf-vnet-hub`](https://github.com/tietoevry-infra-as-code/terraform-azurerm-caf-vnet-hub) from GitHub.
 
@@ -159,8 +159,8 @@ When applying metadata tags to the cloud resources, you can include information 
 
 The following list provides the recommended common tags that capture important context and information about resources. Use this list as a starting point to establish your tagging conventions.
 
-Tag Name|Description|Key|ExampleValue|Required?
---------|-----------|---|------------|---------|
+Tag Name|Description|Key|Example Value|Required?
+--------|-----------|---|-------------|---------|
 Project Name|Name of the Project for the infra is created. This is mandatory to create a resource names.|ProjectName|{Project name}|Yes
 Application Name|Name of the application, service, or workload the resource is associated with.|ApplicationName|{app name}|Yes
 Approver|Name Person responsible for approving costs related to this resource.|Approver|{email}|Yes
