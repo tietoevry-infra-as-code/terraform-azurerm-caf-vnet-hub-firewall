@@ -8,6 +8,8 @@ Source: [Azure Firewall Documentation](https://docs.microsoft.com/en-us/azure/fi
 
 You can centrally create, enforce, and log application and network connectivity policies across subscriptions and virtual networks. Azure Firewall uses a static public IP address for your virtual network resources allowing outside firewalls to identify traffic originating from your virtual network. The service is fully integrated with Azure Monitor for logging and analytics.
 
+This is designed to support hub and spoke architecture in the azure and further security hardening would be recommend to add appropriate firewall application/network/NAT rules to use this for any production workloads.
+
 ## Pre-Requisites
 
 This module depend on following resources availability. To create these pre-requisites, use the module [`terraform-azurerm-caf-vnet-hub`](https://github.com/tietoevry-infra-as-code/terraform-azurerm-caf-vnet-hub) from GitHub.
