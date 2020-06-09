@@ -43,7 +43,6 @@ module "vnet-hub" {
   # First two address ranges from VNet Address space reserved for Gateway And Firewall Subnets.
   # ex.: For 10.1.0.0/16 address space, usable address range start from 10.1.2.0/24 for all subnets.
   # subnet name will be set as per Azure naming convention by defaut. expected value here is: <App or project name>
-
   subnets = {
     mgnt_subnet = {
       subnet_name           = "management"
@@ -85,10 +84,10 @@ module "vnet-hub" {
 
   # (Optional) To enable the availability zones for firewall.
   # Availability Zones can only be configured during deployment
-  # You can't configure an existing firewall to include Availability Zones
+  # You can't modify an existing firewall to include Availability Zones
   firewall_zones = [1, 2, 3]
 
-  # (Required) specify the application rules for Azure Firewall
+  # (Optional) specify the application rules for Azure Firewall
   firewall_application_rules = [
     {
       name             = "microsoft"
@@ -102,7 +101,7 @@ module "vnet-hub" {
     },
   ]
 
-  # (Required) specify the Network rules for Azure Firewall
+  # (Optional) specify the Network rules for Azure Firewall
   firewall_network_rules = [
     {
       name                  = "ntp"
@@ -111,6 +110,21 @@ module "vnet-hub" {
       destination_ports     = ["123"]
       destination_addresses = ["*"]
       protocols             = ["UDP"]
+    },
+  ]
+
+  ## (Optional) specify the NAT rules for Azure Firewall
+  ## `var.public_ip_names` automatically pick the firewall public IP from module.
+  firewall_nat_rules = [
+    {
+      name                  = "testrule"
+      action                = "Dnat"
+      source_addresses      = ["10.0.0.0/8"]
+      destination_ports     = ["53", ]
+      destination_addresses = var.public_ip_names
+      translated_port       = 53
+      translated_address    = "8.8.8.8"
+      protocols             = ["TCP", "UDP", ]
     },
   ]
 

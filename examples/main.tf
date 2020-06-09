@@ -76,7 +76,7 @@ module "vnet-hub" {
   # You can't modify an existing firewall to include Availability Zones
   firewall_zones = [1, 2, 3]
 
-  # (Required) specify the application rules for Azure Firewall
+  # (Optional) specify the application rules for Azure Firewall
   firewall_application_rules = [
     {
       name             = "microsoft"
@@ -90,7 +90,7 @@ module "vnet-hub" {
     },
   ]
 
-  # (Required) specify the Network rules for Azure Firewall
+  # (Optional) specify the Network rules for Azure Firewall
   firewall_network_rules = [
     {
       name                  = "ntp"
@@ -99,6 +99,21 @@ module "vnet-hub" {
       destination_ports     = ["123"]
       destination_addresses = ["*"]
       protocols             = ["UDP"]
+    },
+  ]
+
+  ## (Optional) specify the NAT rules for Azure Firewall
+  ## `var.public_ip_names` automatically pick the firewall public IP from module.
+  firewall_nat_rules = [
+    {
+      name                  = "testrule"
+      action                = "Dnat"
+      source_addresses      = ["10.0.0.0/8"]
+      destination_ports     = ["53", ]
+      destination_addresses = var.public_ip_names
+      translated_port       = 53
+      translated_address    = "8.8.8.8"
+      protocols             = ["TCP", "UDP", ]
     },
   ]
 

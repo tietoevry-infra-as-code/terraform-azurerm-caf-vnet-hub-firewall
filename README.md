@@ -33,10 +33,12 @@ These types of resources are supported:
 * [Network Watcher Workflow Logs](https://www.terraform.io/docs/providers/azurerm/r/network_watcher_flow_log.html)
 * [Private DNS Zone](https://www.terraform.io/docs/providers/azurerm/r/private_dns_zone.html)
 
+## Module Usage
+
 ```hcl
 module "vnet-hub" {
   source = "github.com/tietoevry-infra-as-code/terraform-azurerm-caf-vnet-hub-firewall?ref=v1.0.0"
-  
+
   # By default, this module will create a resource group, proivde the name here
   # to use an existing resource group, specify the existing resource group name,
   # and set the argument to `create_resource_group = false`. Location will be same as existing RG.
@@ -68,7 +70,6 @@ module "vnet-hub" {
   # First two address ranges from VNet Address space reserved for Gateway And Firewall Subnets.
   # ex.: For 10.1.0.0/16 address space, usable address range start from 10.1.2.0/24 for all subnets.
   # subnet name will be set as per Azure naming convention by defaut. expected value here is: <App or project name>
-
   subnets = {
     mgnt_subnet = {
       subnet_name           = "management"
@@ -110,10 +111,10 @@ module "vnet-hub" {
 
   # (Optional) To enable the availability zones for firewall.
   # Availability Zones can only be configured during deployment
-  # You can't configure an existing firewall to include Availability Zones
+  # You can't modify an existing firewall to include Availability Zones
   firewall_zones = [1, 2, 3]
 
-  # (Required) specify the application rules for Azure Firewall
+  # (Optional) specify the application rules for Azure Firewall
   firewall_application_rules = [
     {
       name             = "microsoft"
@@ -127,7 +128,7 @@ module "vnet-hub" {
     },
   ]
 
-  # (Required) specify the Network rules for Azure Firewall
+  # (Optional) specify the Network rules for Azure Firewall
   firewall_network_rules = [
     {
       name                  = "ntp"
@@ -136,6 +137,21 @@ module "vnet-hub" {
       destination_ports     = ["123"]
       destination_addresses = ["*"]
       protocols             = ["UDP"]
+    },
+  ]
+
+  ## (Optional) specify the NAT rules for Azure Firewall
+  ## `var.public_ip_names` automatically pick the firewall public IP from module.
+  firewall_nat_rules = [
+    {
+      name                  = "testrule"
+      action                = "Dnat"
+      source_addresses      = ["10.0.0.0/8"]
+      destination_ports     = ["53", ]
+      destination_addresses = var.public_ip_names
+      translated_port       = 53
+      translated_address    = "8.8.8.8"
+      protocols             = ["TCP", "UDP", ]
     },
   ]
 
@@ -169,13 +185,13 @@ This is an optional feature and only applicable if you are using your own DNS se
 
 This module handles the creation and a list of address spaces for subnets. This module uses `for_each` to create subnets and corresponding service endpoints, service delegation, and network security groups. This module associates the subnets to network security groups as well with additional user-defined NSG rules.  
 
-This module creates 4 subnets by default: Gateway Subnet, AzureFirewallSubnet, and Management Subnet.
+This module creates 4 subnets by default: Gateway Subnet, AzureFirewallSubnet, ApplicationGateway Subnet and Management Subnet.
 
 Name | Description
 ---- | -----------
 Gateway Subnet| Contain VPN Gateway, Express route Gateway
 AzureFirewallSubnet|If added the Firewall module, it Deploys an Azure Firewall that will monitor all incoming and outgoing traffic
-ApplicationGateway|Contain an Application Gateway etc...
+ApplicationGateway|This subnet contain an Application Gateway and any other DMZ services
 Management|Management subnet for Bastion host, accessible from gateway
 
 Both Gateway Subnet and AzureFirewallSubnet allow traffic out and can have public IPs. ApplicationGateway and Management subnet route traffic through the firewall and does not support public IPs due to asymmetric routing.
@@ -353,9 +369,7 @@ Azure Firewall can be configured during deployment to span multiple Availability
 
 To specifies the availability zones in which the Azure Firewall should be created, set the argument `firewall_zones = [1, 2, 3]`.  This is by default is not enabled and set to `none`. There's no additional cost for a firewall deployed in an Availability Zone. However, there are additional costs for inbound and outbound data transfers associated with Availability Zones.
 
-```text
-Note: Availability Zones can only be configured during deployment. You can't modify an existing firewall to include Availability Zones
-```
+>Note: Availability Zones can only be configured during deployment. You can't modify an existing firewall to include Availability Zones
 
 >### Firewall Rules
 
@@ -392,6 +406,21 @@ module "vnet-hub" {
       destination_ports     = ["123"]
       destination_addresses = ["*"]
       protocols             = ["UDP"]
+    },
+  ]
+
+  ## (Optional) specify the NAT rules for Azure Firewall
+  ## `var.public_ip_names` automatically pick the firewall public IP from module.
+  firewall_nat_rules = [
+    {
+      name                  = "testrule"
+      action                = "Dnat"
+      source_addresses      = ["10.0.0.0/8"]
+      destination_ports     = ["53", ]
+      destination_addresses = var.public_ip_names
+      translated_port       = 53
+      translated_address    = "8.8.8.8"
+      protocols             = ["TCP", "UDP", ]
     },
   ]
 
