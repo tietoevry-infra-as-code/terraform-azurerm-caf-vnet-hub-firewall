@@ -1,33 +1,79 @@
-# Please read the README.md file for complete details. 
-# use locals to define repeated blocks to configure the same values across multiple modules. 
-
-module "hub-firewall" {
+module "vnet-hub" {
   source = "github.com/tietoevry-infra-as-code/terraform-azurerm-caf-vnet-hub-firewall?ref=v1.0.0"
 
-  # This module will not create a resource group, proivde the name of an existing resource group
-  # location must be the resource group location
-  # virtual network address space and name, route table name to be provided from vnet-hub module.  
-  resource_group_name           = var.resource_group_name
-  location                      = var.location
-  virtual_network_name          = var.virtual_network_name
-  virtual_network_address_space = var.virtual_network_address_space
-  route_table_name              = var.route_table_name
+  # By default, this module will create a resource group, proivde the name here
+  # to use an existing resource group, specify the existing resource group name, 
+  # and set the argument to `create_resource_group = false`. Location will be same as existing RG. 
+  # RG name must follow Azure naming convention. ex.: rg-<App or project name>-<Subscription type>-<Region>-<###>
+  # Resource group is named like this: rg-hub-tieto-internal-prod-westeurope-001
+  resource_group_name = "rg-hub-tieto-internal-shared-westeurope-001"
+  location            = "westeurope"
 
   # (Required) Project_Name, Subscription_type and environment are must to create resource names.
   project_name      = "tieto-internal"
   subscription_type = "shared"
   environment       = "dev"
 
+  # Provide valid VNet Address space and specify valid domain name for Private DNS Zone.  
+  vnet_address_space    = ["10.1.0.0/16"]
+  private_dns_zone_name = "publiccloud.tieto.com"
+
   # (Required) To enable Azure Monitoring and flow logs
   # Log Retention in days - Possible values range between 30 and 730
-  # Log retention value to be inherited from the VNet-hub Module. 
-  storage_account_id                   = var.storage_account_id
-  log_analytics_workspace_id           = var.log_analytics_workspace_id
-  azure_monitor_logs_retention_in_days = var.azure_monitor_logs_retention_in_days
+  log_analytics_workspace_sku          = "PerGB2018"
+  log_analytics_logs_retention_in_days = 30
+
+  # Adding Standard DDoS Plan, and custom DNS servers (Optional)
+  dns_servers = []
+
+  # Multiple Subnets, Service delegation, Service Endpoints, Network security groups
+  # These are default subnets with required configuration, check README.md for more details
+  # NSG association to be added automatically for all subnets listed here.
+  # First two address ranges from VNet Address space reserved for Gateway And Firewall Subnets. 
+  # ex.: For 10.1.0.0/16 address space, usable address range start from 10.1.2.0/24 for all subnets.
+  # subnet name will be set as per Azure naming convention by defaut. expected value here is: <App or project name>
+  subnets = {
+    mgnt_subnet = {
+      subnet_name           = "management"
+      subnet_address_prefix = ["10.1.2.0/24"]
+      service_endpoints     = ["Microsoft.Storage"]
+
+      nsg_inbound_rules = [
+        # [name, priority, direction, access, protocol, destination_port_range, source_address_prefix, destination_address_prefix]
+        # To use defaults, use "" without adding any value and to use this subnet as a source or destination prefix.
+        ["weballow", "200", "Inbound", "Allow", "Tcp", "22", "*", ""],
+        ["weballow1", "201", "Inbound", "Allow", "Tcp", "3389", "*", ""],
+      ]
+
+      nsg_outbound_rules = [
+        # [name, priority, direction, access, protocol, destination_port_range, source_address_prefix, destination_address_prefix]
+        # To use defaults, use "" without adding any value and to use this subnet as a source or destination prefix.
+        ["ntp_out", "103", "Outbound", "Allow", "Udp", "123", "", "0.0.0.0/0"],
+      ]
+    }
+
+    dmz_subnet = {
+      subnet_name           = "appgateway"
+      subnet_address_prefix = ["10.1.3.0/24"]
+      service_endpoints     = ["Microsoft.Storage"]
+      nsg_inbound_rules = [
+        # [name, priority, direction, access, protocol, destination_port_range, source_address_prefix, destination_address_prefix]
+        # To use defaults, use "" without adding any value and to use this subnet as a source or destination prefix.
+        ["weballow", "100", "Inbound", "Allow", "Tcp", "80", "*", "0.0.0.0/0"],
+        ["weballow1", "101", "Inbound", "Allow", "Tcp", "443", "*", ""],
+
+      ]
+      nsg_outbound_rules = [
+        # [name, priority, direction, access, protocol, destination_port_range, source_address_prefix, destination_address_prefix]
+        # To use defaults, use "" without adding any value and to use this subnet as a source or destination prefix.
+        ["ntp_out", "103", "Outbound", "Allow", "Udp", "123", "", "0.0.0.0/0"],
+      ]
+    }
+  }
 
   # (Optional) To enable the availability zones for firewall. 
   # Availability Zones can only be configured during deployment 
-  # You can't configure an existing firewall to include Availability Zones
+  # You can't modify an existing firewall to include Availability Zones
   firewall_zones = [1, 2, 3]
 
   # (Required) specify the application rules for Azure Firewall

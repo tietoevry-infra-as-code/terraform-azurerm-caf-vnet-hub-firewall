@@ -1,3 +1,8 @@
+variable "create_resource_group" {
+  description = "Whether to create resource group and use it for all networking resources"
+  default     = true
+}
+
 variable "resource_group_name" {
   description = "A container that holds related resources for an Azure solution"
   default     = ""
@@ -23,21 +28,50 @@ variable "environment" {
   default     = ""
 }
 
-variable "virtual_network_name" {
-  description = "Name of your Azure Virtual Network"
-  default     = ""
+variable "vnet_address_space" {
+  description = "The address space to be used for the Azure virtual network."
+  default     = ["10.0.0.0/16"]
 }
 
-variable "virtual_network_address_space" {
-  description = "The address space to be used for the Azure virtual network."
+variable "create_ddos_plan" {
+  description = "Create an ddos plan - Default is false"
+  default     = true
+}
+
+variable "dns_servers" {
+  description = "List of dns servers to use for virtual network"
   default     = []
 }
 
-variable "route_table_name" {
-  description = "The route table name"
-  default     = ""
+variable "create_network_watcher" {
+  description = "Controls if Network Watcher resources should be created for the Azure subscription"
+  default     = true
 }
 
+variable "subnets" {
+  description = "For each subnet, create an object that contain fields"
+  default     = {}
+}
+
+variable "private_dns_zone_name" {
+  description = "The name of the Private DNS zone"
+  default     = null
+}
+
+variable "log_analytics_workspace_sku" {
+  description = "The Sku of the Log Analytics Workspace. Possible values are Free, PerNode, Premium, Standard, Standalone, Unlimited, and PerGB2018"
+  default     = "PerGB2018"
+}
+
+variable "log_analytics_logs_retention_in_days" {
+  description = "The log analytics workspace data retention in days. Possible values range between 30 and 730."
+  default     = 30
+}
+
+variable "nsg_diag_logs" {
+  description = "NSG Monitoring Category details for Azure Diagnostic setting"
+  default     = ["NetworkSecurityGroupEvent", "NetworkSecurityGroupRuleCounter"]
+}
 
 variable "firewall_service_endpoints" {
   description = "Service endpoints to add to the firewall subnet"
@@ -91,26 +125,6 @@ variable "fw_pip_diag_logs" {
 variable "fw_diag_logs" {
   description = "Firewall Monitoring Category details for Azure Diagnostic setting"
   default     = ["AzureFirewallApplicationRule", "AzureFirewallNetworkRule"]
-}
-
-variable "storage_account_id" {
-  description = "The ID of the storage account."
-  default     = ""
-}
-
-variable "log_analytics_workspace_id" {
-  description = "Specifies the id of the Log Analytics Workspace"
-  default     = ""
-}
-
-variable "log_analytics_logs_retention_in_days" {
-  description = "The log analytics workspace data retention in days. Possible values range between 30 and 730."
-  default     = 30
-}
-
-variable "azure_monitor_logs_retention_in_days" {
-  description = "The Azure Monitoring data retention in days."
-  default     = 30
 }
 
 variable "tags" {
