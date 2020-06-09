@@ -383,7 +383,7 @@ module "vnet-hub" {
 
 # ....omitted
 
-  # (Required) specify the application rules for Azure Firewall
+# (Optional) specify the application rules for Azure Firewall
   firewall_application_rules = [
     {
       name             = "microsoft"
@@ -397,7 +397,7 @@ module "vnet-hub" {
     },
   ]
 
-  # (Required) specify the Network rules for Azure Firewall
+  # (Optional) specify the Network rules for Azure Firewall
   firewall_network_rules = [
     {
       name                  = "ntp"
