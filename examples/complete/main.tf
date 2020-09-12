@@ -37,8 +37,8 @@ module "vnet-hub" {
       nsg_inbound_rules = [
         # [name, priority, direction, access, protocol, destination_port_range, source_address_prefix, destination_address_prefix]
         # To use defaults, use "" without adding any value and to use this subnet as a source or destination prefix.
-        ["weballow", "100", "Inbound", "Allow", "Tcp", "22", "*", ""],
-        ["weballow1", "200", "Inbound", "Allow", "Tcp", "3389", "*", ""],
+        ["ssh", "100", "Inbound", "Allow", "Tcp", "22", "*", ""],
+        ["rdp", "200", "Inbound", "Allow", "Tcp", "3389", "*", ""],
       ]
 
       nsg_outbound_rules = [
