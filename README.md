@@ -494,6 +494,20 @@ module "vnet-hub" {
 }
 ```
 
+## Requirements
+
+Name | Version
+-----|--------
+terraform | >= 0.12
+azurerm | ~> 2.23
+
+## Providers
+
+| Name | Version |
+|------|---------|
+azurerm | ~> 2.23
+random | n/a
+
 ## Inputs
 
 Name | Description | Type | Default
