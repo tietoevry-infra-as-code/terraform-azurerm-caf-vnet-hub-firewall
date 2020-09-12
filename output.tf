@@ -32,12 +32,12 @@ output "virtual_network_address_space" {
 
 output "subnet_ids" {
   description = "List of IDs of subnets"
-  value       = flatten(concat([for s in azurerm_subnet.snet : s.id], [azurerm_subnet.gw_snet.id]))
+  value       = flatten(concat([for s in azurerm_subnet.snet : s.id], [var.gateway_subnet_address_prefix != null ? azurerm_subnet.gw_snet.0.id : null], [azurerm_subnet.fw-snet.id]))
 }
 
 output "subnet_address_prefixes" {
   description = "List of address prefix for subnets"
-  value       = flatten(concat([for s in azurerm_subnet.snet : s.address_prefix], [azurerm_subnet.gw_snet.address_prefixes]))
+  value       = flatten(concat([for s in azurerm_subnet.snet : s.address_prefix], [var.gateway_subnet_address_prefix != null ? azurerm_subnet.gw_snet.0.address_prefixes : null], [azurerm_subnet.fw-snet.address_prefixes]))
 }
 
 # Network Security group ids
@@ -49,7 +49,7 @@ output "network_security_group_ids" {
 # DDoS Protection Plan
 output "ddos_protection_plan_id" {
   description = "Ddos protection plan details"
-  value       = element(concat(azurerm_network_ddos_protection_plan.ddos.*.id, [""]), 0)
+  value       = var.create_ddos_plan ? element(concat(azurerm_network_ddos_protection_plan.ddos.*.id, [""]), 0) : null
 }
 
 # Network Watcher
@@ -70,12 +70,12 @@ output "route_table_id" {
 
 output "private_dns_zone_name" {
   description = "The name of the Private DNS zones within Azure DNS"
-  value       = azurerm_private_dns_zone.dz[0].name
+  value       = var.private_dns_zone_name != null ? azurerm_private_dns_zone.dz[0].name : null
 }
 
 output "private_dns_zone_id" {
   description = "The resource id of Private DNS zones within Azure DNS"
-  value       = azurerm_private_dns_zone.dz[0].id
+  value       = var.private_dns_zone_name != null ? azurerm_private_dns_zone.dz[0].id : null
 }
 
 output "storage_account_id" {

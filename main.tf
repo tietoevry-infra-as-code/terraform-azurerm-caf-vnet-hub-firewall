@@ -45,12 +45,12 @@ resource "azurerm_resource_group" "rg" {
 # VNET Creation - Default is "true"
 #-------------------------------------
 resource "azurerm_virtual_network" "vnet" {
-  name                = lower("vnet-${var.project_name}-${var.subscription_type}-${var.environment}-${local.location}-01")
+  name                = lower("vnet-${var.hub_vnet_name}-${local.location}")
   location            = local.location
   resource_group_name = local.resource_group_name
   address_space       = var.vnet_address_space
   dns_servers         = var.dns_servers
-  tags                = merge({ "ResourceName" = lower("vnet-${var.project_name}-${var.subscription_type}-${var.environment}-${local.location}-01") }, var.tags, )
+  tags                = merge({ "ResourceName" = lower("vnet-${var.hub_vnet_name}-${local.location}") }, var.tags, )
 
   dynamic "ddos_protection_plan" {
     for_each = local.if_ddos_enabled
@@ -67,10 +67,10 @@ resource "azurerm_virtual_network" "vnet" {
 #--------------------------------------------
 resource "azurerm_network_ddos_protection_plan" "ddos" {
   count               = var.create_ddos_plan ? 1 : 0
-  name                = lower("${var.project_name}-ddos-protection-plan-${var.subscription_type}")
+  name                = lower("${var.hub_vnet_name}-ddos-protection-plan")
   resource_group_name = local.resource_group_name
   location            = local.location
-  tags                = merge({ "ResourceName" = lower("${var.project_name}-ddos-protection-plan-${var.subscription_type}") }, var.tags, )
+  tags                = merge({ "ResourceName" = lower("${var.hub_vnet_name}-ddos-protection-plan") }, var.tags, )
 }
 
 #-------------------------------------
@@ -98,21 +98,22 @@ resource "azurerm_subnet" "fw-snet" {
   name                 = "AzureFirewallSubnet"
   resource_group_name  = local.resource_group_name
   virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = [cidrsubnet(element(var.vnet_address_space, 0), 8, 0)]
+  address_prefixes     = var.firewall_subnet_address_prefix #[cidrsubnet(element(var.vnet_address_space, 0), 10, 0)]
   service_endpoints    = var.firewall_service_endpoints
 }
 
 resource "azurerm_subnet" "gw_snet" {
-  name                 = lower(format("snet-%s-${var.subscription_type}-${local.location}", "gateway"))
+  count                = var.gateway_subnet_address_prefix != null ? 1 : 0
+  name                 = "GatewaySubnet"
   resource_group_name  = local.resource_group_name
   virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = [cidrsubnet(element(var.vnet_address_space, 0), 8, 1)]
+  address_prefixes     = var.gateway_subnet_address_prefix #[cidrsubnet(element(var.vnet_address_space, 0), 8, 1)]
   service_endpoints    = ["Microsoft.Storage"]
 }
 
 resource "azurerm_subnet" "snet" {
   for_each             = var.subnets
-  name                 = lower(format("snet-%s-${var.subscription_type}-${local.location}", each.value.subnet_name))
+  name                 = lower(format("snet-%s-${var.hub_vnet_name}-${local.location}", each.value.subnet_name))
   resource_group_name  = local.resource_group_name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = each.value.subnet_address_prefix
@@ -182,7 +183,7 @@ resource "azurerm_subnet_route_table_association" "rtassoc" {
 }
 
 resource "azurerm_route" "rt" {
-  name                   = lower("route-to-firewall-${var.project_name}-${var.location}")
+  name                   = lower("route-to-firewall-${var.hub_vnet_name}-${local.location}")
   resource_group_name    = var.resource_group_name
   route_table_name       = azurerm_route_table.rtout.name
   address_prefix         = "0.0.0.0/0"
@@ -240,34 +241,34 @@ resource "random_string" "str" {
 }
 
 resource "azurerm_public_ip_prefix" "pip_prefix" {
-  name                = lower("${var.project_name}-pip-prefix-${var.subscription_type}")
+  name                = lower("${var.hub_vnet_name}-pip-prefix")
   location            = local.location
   resource_group_name = local.resource_group_name
   prefix_length       = 30
-  tags                = merge({ "ResourceName" = lower("${var.project_name}-pip-prefix-${var.subscription_type}") }, var.tags, )
+  tags                = merge({ "ResourceName" = lower("${var.hub_vnet_name}-pip-prefix") }, var.tags, )
 }
 
 resource "azurerm_public_ip" "fw-pip" {
   for_each            = local.public_ip_map
-  name                = lower("pip-${var.project_name}-${each.key}-${local.location}")
+  name                = lower("pip-${var.hub_vnet_name}-${each.key}-${local.location}")
   location            = local.location
   resource_group_name = local.resource_group_name
   allocation_method   = "Static"
   sku                 = "Standard"
   public_ip_prefix_id = azurerm_public_ip_prefix.pip_prefix.id
   domain_name_label   = format("%s%s", lower(replace(each.key, "/[[:^alnum:]]/", "")), random_string.str[each.key].result)
-  tags                = merge({ "ResourceName" = lower("pip-${var.project_name}-${each.key}-${local.location}") }, var.tags, )
+  tags                = merge({ "ResourceName" = lower("pip-${var.hub_vnet_name}-${each.key}-${local.location}") }, var.tags, )
 }
 
 #-----------------
 # Azure Firewall 
 #-----------------
 resource "azurerm_firewall" "fw" {
-  name                = lower("fw-${var.project_name}-${var.subscription_type}-${local.location}")
+  name                = lower("fw-${var.hub_vnet_name}-${local.location}")
   location            = local.location
   resource_group_name = local.resource_group_name
   zones               = var.firewall_zones
-  tags                = merge({ "ResourceName" = lower("fw-${var.project_name}-${var.subscription_type}-${local.location}") }, var.tags, )
+  tags                = merge({ "ResourceName" = lower("fw-${var.hub_vnet_name}-${local.location}") }, var.tags, )
   dynamic "ip_configuration" {
     for_each = local.public_ip_map
     iterator = ip
@@ -284,7 +285,7 @@ resource "azurerm_firewall" "fw" {
 #----------------------------------------------
 resource "azurerm_firewall_application_rule_collection" "fw_app" {
   for_each            = local.fw_application_rules
-  name                = lower(format("fw-app-rule-%s-${var.environment}-${local.location}", each.key))
+  name                = lower(format("fw-app-rule-%s-${var.hub_vnet_name}-${local.location}", each.key))
   azure_firewall_name = azurerm_firewall.fw.name
   resource_group_name = local.resource_group_name
   priority            = 100 * (each.value.idx + 1)
@@ -304,7 +305,7 @@ resource "azurerm_firewall_application_rule_collection" "fw_app" {
 
 resource "azurerm_firewall_network_rule_collection" "fw" {
   for_each            = local.fw_network_rules
-  name                = lower(format("fw-net-rule-%s-${var.environment}-${local.location}", each.key))
+  name                = lower(format("fw-net-rule-%s-${var.hub_vnet_name}-${local.location}", each.key))
   azure_firewall_name = azurerm_firewall.fw.name
   resource_group_name = local.resource_group_name
   priority            = 100 * (each.value.idx + 1)
@@ -321,7 +322,7 @@ resource "azurerm_firewall_network_rule_collection" "fw" {
 
 resource "azurerm_firewall_nat_rule_collection" "fw" {
   for_each            = local.fw_nat_rules
-  name                = lower(format("fw-nat-rule-%s-${var.environment}-${local.location}", each.key))
+  name                = lower(format("fw-nat-rule-%s-${var.hub_vnet_name}-${local.location}", each.key))
   azure_firewall_name = azurerm_firewall.fw.name
   resource_group_name = local.resource_group_name
   priority            = 100 * (each.value.idx + 1)
@@ -342,14 +343,14 @@ resource "azurerm_firewall_nat_rule_collection" "fw" {
 # Storage Account for Logs Archive
 #-----------------------------------------------
 resource "azurerm_storage_account" "storeacc" {
-  name                      = format("stdiaglogs%s", lower(replace(var.project_name, "/[[:^alnum:]]/", "")))
+  name                      = format("stdiaglogs%s", lower(replace(var.hub_vnet_name, "/[[:^alnum:]]/", "")))
   resource_group_name       = local.resource_group_name
   location                  = local.location
   account_kind              = "StorageV2"
   account_tier              = "Standard"
   account_replication_type  = "GRS"
   enable_https_traffic_only = true
-  tags                      = merge({ "ResourceName" = format("stdiaglogs%s", lower(replace(var.project_name, "/[[:^alnum:]]/", ""))) }, var.tags, )
+  tags                      = merge({ "ResourceName" = format("stdiaglogs%s", lower(replace(var.hub_vnet_name, "/[[:^alnum:]]/", ""))) }, var.tags, )
 }
 
 #-----------------------------------------------
@@ -359,17 +360,17 @@ resource "random_string" "main" {
   length  = 8
   special = false
   keepers = {
-    name = var.project_name
+    name = var.hub_vnet_name
   }
 }
 
 resource "azurerm_log_analytics_workspace" "logws" {
-  name                = lower("logaws-${random_string.main.result}-${var.project_name}-${var.subscription_type}-${var.environment}-${local.location}")
+  name                = lower("logaws-${random_string.main.result}-${var.hub_vnet_name}-${local.location}")
   resource_group_name = local.resource_group_name
   location            = local.location
   sku                 = var.log_analytics_workspace_sku
   retention_in_days   = var.log_analytics_logs_retention_in_days
-  tags                = merge({ "ResourceName" = lower("logaws-${random_string.main.result}-${var.project_name}-${var.subscription_type}-${var.environment}-${local.location}") }, var.tags, )
+  tags                = merge({ "ResourceName" = lower("logaws-${random_string.main.result}-${var.hub_vnet_name}-${local.location}") }, var.tags, )
 }
 
 #-----------------------------------------
@@ -401,7 +402,7 @@ resource "azurerm_network_watcher_flow_log" "nwflog" {
 # azurerm monitoring diagnostics - VNet, NSG, PIP, and Firewall
 #---------------------------------------------------------------
 resource "azurerm_monitor_diagnostic_setting" "vnet" {
-  name                       = lower("vnet-${var.project_name}-diag")
+  name                       = lower("vnet-${var.hub_vnet_name}-diag")
   target_resource_id         = azurerm_virtual_network.vnet.id
   storage_account_id         = azurerm_storage_account.storeacc.id
   log_analytics_workspace_id = azurerm_log_analytics_workspace.logws.id
@@ -471,7 +472,7 @@ resource "azurerm_monitor_diagnostic_setting" "fw-pip" {
 }
 
 resource "azurerm_monitor_diagnostic_setting" "fw-diag" {
-  name                       = lower("fw-${var.project_name}-diag")
+  name                       = lower("fw-${var.hub_vnet_name}-diag")
   target_resource_id         = azurerm_firewall.fw.id
   storage_account_id         = azurerm_storage_account.storeacc.id
   log_analytics_workspace_id = azurerm_log_analytics_workspace.logws.id

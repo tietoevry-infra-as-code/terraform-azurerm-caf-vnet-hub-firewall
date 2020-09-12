@@ -11,23 +11,19 @@ This is designed to quickly deploy hub and spoke architecture in the azure and f
 ``` hcl
 module "vnet-hub" {
   source = "github.com/tietoevry-infra-as-code/terraform-azurerm-caf-vnet-hub-firewall?ref=v1.0.0"
-  
+
   # By default, this module will create a resource group, proivde the name here
   # to use an existing resource group, specify the existing resource group name,
   # and set the argument to `create_resource_group = false`. Location will be same as existing RG.
-  # RG name must follow Azure naming convention. ex.: rg-<App or project name>-<Subscription type>-<Region>-<###>
-  # Resource group is named like this: rg-hub-tieto-internal-prod-westeurope-001
-  resource_group_name = "rg-hub-tieto-internal-shared-westeurope-001"
+  resource_group_name = "rg-hub-demo-internal-shared-westeurope-001"
   location            = "westeurope"
-
-  # (Required) Project_Name, Subscription_type and environment are must to create resource names.
-  project_name      = "tieto-internal"
-  subscription_type = "shared"
-  environment       = "dev"
+  hub_vnet_name       = "default-hub"
 
   # Provide valid VNet Address space and specify valid domain name for Private DNS Zone.  
-  vnet_address_space    = ["10.1.0.0/16"]
-  private_dns_zone_name = "publiccloud.tieto.com"
+  vnet_address_space             = ["10.1.0.0/16"]
+  firewall_subnet_address_prefix = ["10.1.0.0/26"]
+  gateway_subnet_address_prefix  = ["10.1.1.0/27"]
+  private_dns_zone_name          = "publiccloud.example.com"
 
   # (Required) To enable Azure Monitoring and flow logs
   # Log Retention in days - Possible values range between 30 and 730
@@ -52,14 +48,14 @@ module "vnet-hub" {
       nsg_inbound_rules = [
         # [name, priority, direction, access, protocol, destination_port_range, source_address_prefix, destination_address_prefix]
         # To use defaults, use "" without adding any value and to use this subnet as a source or destination prefix.
-        ["weballow", "200", "Inbound", "Allow", "Tcp", "22", "*", ""],
-        ["weballow1", "201", "Inbound", "Allow", "Tcp", "3389", "*", ""],
+        ["weballow", "100", "Inbound", "Allow", "Tcp", "22", "*", ""],
+        ["weballow1", "200", "Inbound", "Allow", "Tcp", "3389", "*", ""],
       ]
 
       nsg_outbound_rules = [
         # [name, priority, direction, access, protocol, destination_port_range, source_address_prefix, destination_address_prefix]
         # To use defaults, use "" without adding any value and to use this subnet as a source or destination prefix.
-        ["ntp_out", "103", "Outbound", "Allow", "Udp", "123", "", "0.0.0.0/0"],
+        ["ntp_out", "100", "Outbound", "Allow", "Udp", "123", "", "0.0.0.0/0"],
       ]
     }
 
@@ -70,14 +66,16 @@ module "vnet-hub" {
       nsg_inbound_rules = [
         # [name, priority, direction, access, protocol, destination_port_range, source_address_prefix, destination_address_prefix]
         # To use defaults, use "" without adding any value and to use this subnet as a source or destination prefix.
-        ["weballow", "100", "Inbound", "Allow", "Tcp", "80", "*", "0.0.0.0/0"],
-        ["weballow1", "101", "Inbound", "Allow", "Tcp", "443", "*", ""],
+        # 65200-65335 port to be opened if you planning to create application gateway
+        ["http", "100", "Inbound", "Allow", "Tcp", "80", "*", "0.0.0.0/0"],
+        ["https", "200", "Inbound", "Allow", "Tcp", "443", "*", ""],
+        ["appgwports", "300", "Inbound", "Allow", "Tcp", "65200-65335", "*", ""],
 
       ]
       nsg_outbound_rules = [
         # [name, priority, direction, access, protocol, destination_port_range, source_address_prefix, destination_address_prefix]
         # To use defaults, use "" without adding any value and to use this subnet as a source or destination prefix.
-        ["ntp_out", "103", "Outbound", "Allow", "Udp", "123", "", "0.0.0.0/0"],
+        ["ntp_out", "100", "Outbound", "Allow", "Udp", "123", "", "0.0.0.0/0"],
       ]
     }
   }
@@ -113,15 +111,16 @@ module "vnet-hub" {
     },
   ]
 
-  ## (Optional) specify the NAT rules for Azure Firewall
-  ## `var.public_ip_names` automatically pick the firewall public IP from module.
+  # (Optional) specify the NAT rules for Azure Firewall
+  # Destination address must be Firewall public IP
+  # `fw-public` is a variable value and automatically pick the firewall public IP from module.
   firewall_nat_rules = [
     {
       name                  = "testrule"
       action                = "Dnat"
       source_addresses      = ["10.0.0.0/8"]
       destination_ports     = ["53", ]
-      destination_addresses = var.public_ip_names
+      destination_addresses = ["fw-public"]
       translated_port       = 53
       translated_address    = "8.8.8.8"
       protocols             = ["TCP", "UDP", ]
@@ -131,7 +130,7 @@ module "vnet-hub" {
   # Adding TAG's to your Azure resources (Required)
   # ProjectName and Env are already declared above, to use them here, create a varible.
   tags = {
-    ProjectName  = "tieto-internal"
+    ProjectName  = "demo-internal"
     Env          = "dev"
     Owner        = "user@example.com"
     BusinessUnit = "CORP"
