@@ -1,12 +1,13 @@
 module "vnet-hub" {
-  source = "github.com/tietoevry-infra-as-code/terraform-azurerm-caf-vnet-hub-firewall?ref=v2.0.0"
+  source  = "kumarvna/caf-virtual-network-hub/azurerm"
+  version = "2.0.0"
 
   # By default, this module will create a resource group, proivde the name here
   # to use an existing resource group, specify the existing resource group name, 
   # and set the argument to `create_resource_group = false`. Location will be same as existing RG. 
-  resource_group_name = "rg-hub-internal-shared-westeurope-001"
+  resource_group_name = "rg-hub-demo-internal-shared-westeurope-001"
   location            = "westeurope"
-  hub_vnet_name       = "demo-hub"
+  hub_vnet_name       = "default-hub"
 
   # Provide valid VNet Address space and specify valid domain name for Private DNS Zone.  
   vnet_address_space             = ["10.1.0.0/16"]
@@ -44,7 +45,7 @@ module "vnet-hub" {
       nsg_outbound_rules = [
         # [name, priority, direction, access, protocol, destination_port_range, source_address_prefix, destination_address_prefix]
         # To use defaults, use "" without adding any value and to use this subnet as a source or destination prefix.
-        ["ntp_out", "100", "Outbound", "Allow", "Udp", "123", "", "0.0.0.0/0"],
+        ["ntp_out", "300", "Outbound", "Allow", "Udp", "123", "", "0.0.0.0/0"],
       ]
     }
 
@@ -64,7 +65,7 @@ module "vnet-hub" {
       nsg_outbound_rules = [
         # [name, priority, direction, access, protocol, destination_port_range, source_address_prefix, destination_address_prefix]
         # To use defaults, use "" without adding any value and to use this subnet as a source or destination prefix.
-        ["ntp_out", "100", "Outbound", "Allow", "Udp", "123", "", "0.0.0.0/0"],
+        ["ntp_out", "400", "Outbound", "Allow", "Udp", "123", "", "0.0.0.0/0"],
       ]
     }
   }

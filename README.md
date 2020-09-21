@@ -38,7 +38,8 @@ These types of resources are supported:
 
 ```hcl
 module "vnet-hub" {
-  source = "github.com/tietoevry-infra-as-code/terraform-azurerm-caf-vnet-hub-firewall?ref=v2.0.0"
+  source  = "kumarvna/caf-virtual-network-hub/azurerm"
+  version = "2.0.0"
 
   # By default, this module will create a resource group, proivde the name here
   # to use an existing resource group, specify the existing resource group name,
@@ -83,7 +84,7 @@ module "vnet-hub" {
       nsg_outbound_rules = [
         # [name, priority, direction, access, protocol, destination_port_range, source_address_prefix, destination_address_prefix]
         # To use defaults, use "" without adding any value and to use this subnet as a source or destination prefix.
-        ["ntp_out", "100", "Outbound", "Allow", "Udp", "123", "", "0.0.0.0/0"],
+        ["ntp_out", "300", "Outbound", "Allow", "Udp", "123", "", "0.0.0.0/0"],
       ]
     }
 
@@ -103,7 +104,7 @@ module "vnet-hub" {
       nsg_outbound_rules = [
         # [name, priority, direction, access, protocol, destination_port_range, source_address_prefix, destination_address_prefix]
         # To use defaults, use "" without adding any value and to use this subnet as a source or destination prefix.
-        ["ntp_out", "100", "Outbound", "Allow", "Udp", "123", "", "0.0.0.0/0"],
+        ["ntp_out", "400", "Outbound", "Allow", "Udp", "123", "", "0.0.0.0/0"],
       ]
     }
   }
@@ -204,7 +205,8 @@ This module supports enabling the service endpoint of your choosing under the vi
 
 ```hcl
 module "vnet-hub" {
-  source = "github.com/tietoevry-infra-as-code/terraform-azurerm-caf-vnet-hub-firewall?ref=v2.0.0"
+  source  = "kumarvna/caf-virtual-network-hub/azurerm"
+  version = "2.0.0"
 
   # .... omitted
 
@@ -231,7 +233,8 @@ This module supports enabling the service delegation of your choosing under the 
 
 ```hcl
 module "vnet-hub" {
-  source = "github.com/tietoevry-infra-as-code/terraform-azurerm-caf-vnet-hub-firewall?ref=v2.0.0"
+  source  = "kumarvna/caf-virtual-network-hub/azurerm"
+  version = "2.0.0"
 
   # .... omitted
 
@@ -264,7 +267,8 @@ This module Enable or Disable network policies for the private link endpoint on 
 
 ```hcl
 module "vnet-hub" {
-  source = "github.com/tietoevry-infra-as-code/terraform-azurerm-caf-vnet-hub-firewall?ref=v2.0.0"
+  source  = "kumarvna/caf-virtual-network-hub/azurerm"
+  version = "2.0.0"
 
   # .... omitted
 
@@ -293,7 +297,8 @@ This module Enable or Disable network policies for the private link service on t
 
 ```hcl
 module "vnet-hub" {
-  source = "github.com/tietoevry-infra-as-code/terraform-azurerm-caf-vnet-hub-firewall?ref=v2.0.0"
+  source  = "kumarvna/caf-virtual-network-hub/azurerm"
+  version = "2.0.0"
 
   # .... omitted
 
@@ -324,7 +329,8 @@ In the Source and Destination columns, `VirtualNetwork`, `AzureLoadBalancer`, an
 
 ```hcl
 module "vnet-hub" {
-  source = "github.com/tietoevry-infra-as-code/terraform-azurerm-caf-vnet-hub-firewall?ref=v2.0.0"
+  source  = "kumarvna/caf-virtual-network-hub/azurerm"
+  version = "2.0.0"
 
   # .... omitted
   
@@ -337,8 +343,8 @@ module "vnet-hub" {
       nsg_inbound_rules = [
         # [name, priority, direction, access, protocol, destination_port_range, source_address_prefix, destination_address_prefix]
         # To use defaults, use "" without adding any value and to use this subnet as a source or destination prefix.
-        ["ssh", "200", "Inbound", "Allow", "Tcp", "22", "*", ""],
-        ["rdp", "201", "Inbound", "Allow", "Tcp", "3389", "*", ""],
+        ["weballow", "200", "Inbound", "Allow", "Tcp", "22", "*", ""],
+        ["weballow1", "201", "Inbound", "Allow", "Tcp", "3389", "*", ""],
       ]
 
       nsg_outbound_rules = [
@@ -379,7 +385,8 @@ To define the firewall rules, use the input variables `firewall_application_rule
 
 ``` hcl
 module "vnet-hub" {
-  source = "github.com/tietoevry-infra-as-code/terraform-azurerm-caf-vnet-hub-firewall?ref=v2.0.0"
+  source  = "kumarvna/caf-virtual-network-hub/azurerm"
+  version = "2.0.0"
 
 # ....omitted
 
@@ -478,8 +485,8 @@ End Date of the Project|Date when this application, workload, or service is plan
 
 ```hcl
 module "vnet-hub" {
-  source = "github.com/tietoevry-infra-as-code/terraform-azurerm-caf-vnet-hub-firewall?ref=v2.0.0"
-
+  source  = "kumarvna/caf-virtual-network-hub/azurerm"
+  version = "2.0.0"
   create_resource_group   = true
 
   # ... omitted
@@ -577,7 +584,7 @@ Name | Description
 
 ## Authors
 
-Originally created by [Kumaraswamy Vithanala (Kumar)](mailto:kumarvna@gmail.com)
+Originally created by [Kumaraswamy Vithanala](mailto:kumaraswamy.vithanala@tieto.com)
 
 ## Other resources
 
